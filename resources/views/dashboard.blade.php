@@ -108,6 +108,11 @@
                                                 <button class="btn btn-secondary btn-sm" onclick="toggleDetails('{{ $order->id }}')">
                                                     🔍 Detail
                                                 </button>
+                                                @if($order->status === 'pending' && $order->payment_method === 'Midtrans')
+                                                    <a href="{{ route('orders.pay', $order->id) }}" class="btn btn-accent btn-sm" style="font-weight: 600; margin-right: 4px;">
+                                                        💳 Bayar Sekarang
+                                                    </a>
+                                                @endif
                                                 <a href="{{ route('user.order.invoice', $order->id) }}" target="_blank" class="btn btn-primary btn-sm" style="background-color: var(--primary); color: white;">
                                                     🖨️ Cetak Nota
                                                 </a>

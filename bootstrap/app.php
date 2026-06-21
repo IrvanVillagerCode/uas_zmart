@@ -11,11 +11,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Exclude Firebase sync routes from CSRF (secured by Firebase token instead)
+        // Exclude Firebase sync and Midtrans webhook routes from CSRF
         $middleware->validateCsrfTokens(except: [
             'google-sync',
             'login-sync',
             'register-sync',
+            'midtrans/notification',
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

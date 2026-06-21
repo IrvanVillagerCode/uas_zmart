@@ -39,6 +39,7 @@
                     <div class="form-group">
                         <label class="form-label" for="payment_method">Metode Pembayaran *</label>
                         <select class="form-control" id="payment_method" name="payment_method" required>
+                            <option value="Midtrans" {{ old('payment_method') === 'Midtrans' ? 'selected' : '' }}>Midtrans (Virtual Account, QRIS, E-Wallet, Kartu Kredit)</option>
                             <option value="Transfer Bank" {{ old('payment_method') === 'Transfer Bank' ? 'selected' : '' }}>Transfer Bank Manual (BCA / Mandiri)</option>
                             <option value="COD" {{ old('payment_method') === 'COD' ? 'selected' : '' }}>COD (Bayar di Tempat saat Barang Tiba)</option>
                         </select>

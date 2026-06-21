@@ -253,7 +253,14 @@
 
     <!-- Top control bar (hidden in print) -->
     <div class="control-bar">
-        <a href="{{ route('user.dashboard') }}" class="btn-close">← Kembali ke Dashboard</a>
+        <div>
+            <a href="{{ route('user.dashboard') }}" class="btn-close" style="margin-right: 15px;">← Kembali ke Dashboard</a>
+            @if($order->status === 'pending' && $order->payment_method === 'Midtrans')
+                <a href="{{ route('orders.pay', $order->id) }}" class="btn-print" style="background-color: var(--success); text-decoration: none; display: inline-flex; align-items: center; color: white; padding: 8px 16px; border-radius: 6px; font-weight: 600; font-size: 13px;">
+                    💳 Bayar Sekarang (Midtrans)
+                </a>
+            @endif
+        </div>
         <button class="btn-print" onclick="window.print()">
             🖨️ Cetak Nota (PDF / Paper)
         </button>

@@ -11,8 +11,70 @@
     
     <!-- Optional Page Styles -->
     @yield('styles')
+
+    <!-- Premium Preloader CSS -->
+    <style>
+        #site-preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 999999;
+            transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+                        visibility 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        #site-preloader.fade-out {
+            opacity: 0;
+            visibility: hidden;
+        }
+        .loader-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        .spinner-ring {
+            width: 56px;
+            height: 56px;
+            border: 3.5px solid rgba(79, 70, 229, 0.08);
+            border-radius: 50%;
+            border-top: 3.5px solid #4f46e5;
+            border-right: 3.5px solid #4f46e5;
+            animation: preloader-spin 0.8s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+        .loader-text {
+            font-family: 'Outfit', sans-serif;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            color: #0f172a;
+            animation: preloader-pulse 1.6s ease-in-out infinite;
+        }
+        @keyframes preloader-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        @keyframes preloader-pulse {
+            0%, 100% { opacity: 0.5; transform: scale(0.96); }
+            50% { opacity: 1; transform: scale(1.04); }
+        }
+    </style>
 </head>
 <body>
+
+    <!-- Modern Premium Preloader -->
+    <div id="site-preloader" class="preloader">
+        <div class="loader-content">
+            <div class="spinner-ring"></div>
+            <div class="loader-text">Z-MART</div>
+        </div>
+    </div>
 
     <!-- Header Navigation -->
     <header class="header">
@@ -123,6 +185,16 @@
 
     <!-- Optional Page Scripts -->
     @yield('scripts')
+
+    <!-- Preloader Fade-out Script -->
+    <script>
+        window.addEventListener('load', function() {
+            const preloader = document.getElementById('site-preloader');
+            if (preloader) {
+                preloader.classList.add('fade-out');
+            }
+        });
+    </script>
 
 </body>
 </html>

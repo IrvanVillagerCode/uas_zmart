@@ -118,6 +118,8 @@ CREATE TABLE `orders` (
   `total_amount` decimal(10,2) NOT NULL,
   `status` enum('pending','success','failed','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
   `payment_method` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `snap_token` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payment_url` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `shipping_address` text COLLATE utf8mb4_unicode_ci,
   `notes` text COLLATE utf8mb4_unicode_ci,
   `shipping_proof_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,

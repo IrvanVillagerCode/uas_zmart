@@ -3,6 +3,11 @@
 @section('title', 'Admin Dashboard')
 
 @section('content')
+@php
+    $clothingCategories = ['kaos', 'jaket', 'kemeja', 'celana', 'hoodie'];
+    $clothingProducts = $products->filter(fn($p) => in_array($p->category, $clothingCategories));
+    $sembakoProducts = $products->filter(fn($p) => !in_array($p->category, $clothingCategories));
+@endphp
 <div class="dashboard-wrapper">
     <div class="dashboard-grid">
         
@@ -30,6 +35,16 @@
                 <li>
                     <button class="sidebar-link" onclick="switchTab(event, 'tab-products')" style="width:100%; text-align:left; background:none; border:none;">
                         👕 Kelola Produk Baju
+                    </button>
+                </li>
+                <li>
+                    <button class="sidebar-link" onclick="switchTab(event, 'tab-sembako')" style="width:100%; text-align:left; background:none; border:none;">
+                        🌾 Kelola Sembako
+                    </button>
+                </li>
+                <li>
+                    <button class="sidebar-link" onclick="switchTab(event, 'tab-active-users')" style="width:100%; text-align:left; background:none; border:none;">
+                        👥 User Aktif <span id="active-users-count-badge" class="badge" style="background-color: var(--success); color: white; border-radius: 50%; padding: 2px 6px; font-size: 11px; margin-left: 4px; display: none;">0</span>
                     </button>
                 </li>
                 <li>
@@ -72,9 +87,11 @@
                         <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">Transaksi checkout masuk</small>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-title">Katalog Produk Baju</span>
+                        <span class="stat-title">Katalog Produk Toko</span>
                         <span class="stat-value">{{ $totalProducts }}</span>
-                        <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">Item terdaftar di database</small>
+                        <small style="color: var(--text-muted); font-size: 11px; margin-top: 4px;">
+                            {{ $clothingProducts->count() }} Pakaian | {{ $sembakoProducts->count() }} Sembako & Harian
+                        </small>
                     </div>
                     <div class="stat-card">
                         <span class="stat-title">Pelanggan Terdaftar</span>
@@ -119,11 +136,77 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($products as $product)
+                            @foreach($clothingProducts as $product)
                                 <tr>
                                     <td>
                                         <div class="cart-product">
                                             <img src="{{ $product->image }}" alt="{{ $product->name }}" class="cart-product-img" style="width: 50px; height: 62px;">
+                                            <div>
+                                                <span class="cart-product-name" style="font-size: 14px;">{{ $product->name }}</span>
+                                                <small style="color: var(--text-muted); display: block; font-size: 11px; margin-top: 2px;">ID: {{ $product->id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="font-size: 13px; text-transform: capitalize; color: var(--text-muted);">
+                                        {{ $product->category }}
+                                    </td>
+                                    <td style="font-weight: 700; font-size: 14px; color: var(--secondary);">
+                                        Rp {{ number_format($product->price, 0, ',', '.') }}
+                                    </td>
+                                    <td style="font-size: 14px; font-weight: 600; color: {{ $product->stock <= 10 ? 'var(--danger)' : 'var(--text)' }}">
+                                        {{ $product->stock }}
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; gap: 8px;">
+                                            <button class="btn btn-secondary btn-sm" onclick="openEditModal({{ json_encode($product) }})">
+                                                ✏️ Edit
+                                            </button>
+                                            <form action="{{ route('admin.products.delete', $product->id) }}" method="POST" onsubmit="return confirm('Hapus produk ini dari database secara permanen?')">
+                                                @csrf
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    🗑️ Hapus
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 5: MANAGE SEMBAKO -->
+            <!-- TAB 5: MANAGE SEMBAKO -->
+            <div id="tab-sembako" class="tab-pane" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <h2 style="font-size: 26px; color: var(--secondary);">Katalog Produk Sembako & Kebutuhan Harian</h2>
+                        <p style="color: var(--text-muted); font-size: 14px;">Tambah, ubah, dan hapus stok sembako, makanan, minuman, dan kebutuhan harian.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="openModal('add-sembako-modal')" style="background-color: var(--success); border-color: var(--success);">
+                        ➕ Tambah Sembako
+                    </button>
+                </div>
+
+                <!-- Sembako Table -->
+                <div style="overflow-x: auto;">
+                    <table class="cart-table" style="min-width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Produk</th>
+                                <th>Kategori</th>
+                                <th>Harga</th>
+                                <th>Stok</th>
+                                <th>Aksi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($sembakoProducts as $product)
+                                <tr>
+                                    <td>
+                                        <div class="cart-product">
+                                            <img src="{{ $product->image }}" alt="{{ $product->name }}" class="cart-product-img" style="width: 50px; height: 62px; object-fit: cover; border-radius: var(--radius-sm);">
                                             <div>
                                                 <span class="cart-product-name" style="font-size: 14px;">{{ $product->name }}</span>
                                                 <small style="color: var(--text-muted); display: block; font-size: 11px; margin-top: 2px;">ID: {{ $product->id }}</small>
@@ -244,6 +327,44 @@
                                     </td>
                                 </tr>
                             @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 6: ACTIVE USERS -->
+            <!-- TAB 6: ACTIVE USERS -->
+            <div id="tab-active-users" class="tab-pane" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                    <div>
+                        <h2 style="font-size: 26px; color: var(--secondary);">Sesi & User Aktif Real-Time</h2>
+                        <p style="color: var(--text-muted); font-size: 14px;">Pantau pengunjung dan sesi pengguna yang sedang aktif saat ini.</p>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px; background: var(--surface-muted); padding: 8px 16px; border-radius: var(--radius-md); border: 1px solid var(--border);">
+                        <span style="display: inline-block; width: 10px; height: 10px; background-color: var(--success); border-radius: 50%; animation: pulse 1.5s infinite;"></span>
+                        <span style="font-size: 12px; font-weight: 600; color: var(--secondary);">Live Connection</span>
+                    </div>
+                </div>
+
+                <!-- Active Users Table -->
+                <div style="overflow-x: auto;">
+                    <table class="cart-table" style="min-width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>IP Address</th>
+                                <th>Perangkat / Browser</th>
+                                <th>Terakhir Aktif</th>
+                                <th>Status Sesi</th>
+                            </tr>
+                        </thead>
+                        <tbody id="active-users-table-body">
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                                    Memuat data user aktif...
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -438,6 +559,11 @@
                     <option value="kemeja">Kemeja</option>
                     <option value="celana">Celana</option>
                     <option value="hoodie">Hoodie</option>
+                    <option value="sembako">Sembako</option>
+                    <option value="makanan">Makanan</option>
+                    <option value="minuman">Minuman</option>
+                    <option value="kebersihan">Kebersihan</option>
+                    <option value="perawatan">Perawatan</option>
                 </select>
             </div>
 
@@ -454,6 +580,67 @@
             <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
                 <button type="button" class="btn btn-secondary" onclick="closeModal('add-product-modal')">Batal</button>
                 <button type="submit" class="btn btn-primary">Simpan Produk</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL: ADD SEMBAKO -->
+<!-- MODAL: ADD SEMBAKO -->
+<div id="add-sembako-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 style="font-size: 20px; color: var(--secondary);">Tambah Produk Sembako Baru</h3>
+            <button class="modal-close" onclick="closeModal('add-sembako-modal')">&times;</button>
+        </div>
+        <form action="{{ route('admin.products.store') }}" method="POST" enctype="multipart/form-data">
+            @csrf
+            
+            <div class="form-group">
+                <label class="form-label" for="sembako_name">Nama Produk Sembako *</label>
+                <input type="text" class="form-control" id="sembako_name" name="name" required placeholder="Contoh: Beras Premium 5kg / Minyak Goreng 2L">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="sembako_description">Deskripsi Produk</label>
+                <textarea class="form-control" id="sembako_description" name="description" rows="3" placeholder="Jelaskan detail kemasan, kualitas, dan masa kedaluwarsa..."></textarea>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="form-group">
+                    <label class="form-label" for="sembako_price">Harga (Rp) *</label>
+                    <input type="number" class="form-control" id="sembako_price" name="price" required min="0" placeholder="Contoh: 14000">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="sembako_stock">Stok *</label>
+                    <input type="number" class="form-control" id="sembako_stock" name="stock" required min="0" placeholder="Contoh: 100">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="sembako_category">Kategori Sembako *</label>
+                <select class="form-control" id="sembako_category" name="category" required>
+                    <option value="sembako">Sembako</option>
+                    <option value="makanan">Makanan</option>
+                    <option value="minuman">Minuman</option>
+                    <option value="kebersihan">Kebersihan</option>
+                    <option value="perawatan">Perawatan</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 16px;">
+                <label class="form-label" for="sembako_image_file">Unggah Gambar Produk (File)</label>
+                <input type="file" class="form-control" id="sembako_image_file" name="image_file" accept="image/*">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="sembako_image_url">Atau URL Gambar Produk</label>
+                <input type="url" class="form-control" id="sembako_image_url" name="image_url" placeholder="https://images.unsplash.com/...">
+            </div>
+
+            <div style="margin-top: 24px; display: flex; justify-content: flex-end; gap: 12px;">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('add-sembako-modal')">Batal</button>
+                <button type="submit" class="btn btn-primary" style="background-color: var(--success); border-color: var(--success);">Simpan Sembako</button>
             </div>
         </form>
     </div>
@@ -498,6 +685,11 @@
                     <option value="kemeja">Kemeja</option>
                     <option value="celana">Celana</option>
                     <option value="hoodie">Hoodie</option>
+                    <option value="sembako">Sembako</option>
+                    <option value="makanan">Makanan</option>
+                    <option value="minuman">Minuman</option>
+                    <option value="kebersihan">Kebersihan</option>
+                    <option value="perawatan">Perawatan</option>
                 </select>
             </div>
 
@@ -804,5 +996,160 @@
             });
         }
     }
+</script>
+
+<style>
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
+    }
+    70% {
+        transform: scale(1);
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0);
+    }
+    100% {
+        transform: scale(0.95);
+        box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+    }
+}
+</style>
+
+<script>
+    let activeUsersInterval = null;
+
+    function fetchActiveUsers() {
+        fetch("{{ route('admin.active-users') }}")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const tbody = document.getElementById('active-users-table-body');
+                    const badge = document.getElementById('active-users-count-badge');
+                    
+                    if (data.count > 0) {
+                        badge.textContent = data.count;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+
+                    if (data.count === 0) {
+                        tbody.innerHTML = `
+                            <tr>
+                                <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                                    Tidak ada sesi aktif dalam 5 menit terakhir.
+                                </td>
+                            </tr>
+                        `;
+                        return;
+                    }
+
+                    let rowsHtml = '';
+                    data.active_users.forEach(user => {
+                        let avatarHtml = '';
+                        if (user.avatar && user.avatar.length <= 4 && !user.avatar.startsWith('http') && !user.avatar.startsWith('/')) {
+                            avatarHtml = `<div class="emoji-avatar-placeholder" style="display: flex; align-items: center; justify-content: center; font-size: 20px; background-color: var(--primary-light); width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border); user-select: none;">${user.avatar}</div>`;
+                        } else {
+                            const avatarSrc = user.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=100&auto=format&fit=crop&q=80';
+                            avatarHtml = `<img src="${avatarSrc}" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border);">`;
+                        }
+
+                        let roleBadge = '';
+                        if (user.role === 'admin') {
+                            roleBadge = `<span class="status-badge status-failed" style="font-size: 10px; background-color: #fee2e2; color: #dc2626; border: 1px solid #fca5a5;">Admin</span>`;
+                        } else if (user.role === 'customer') {
+                            roleBadge = `<span class="status-badge status-success" style="font-size: 10px; background-color: #ecfdf5; color: #059669; border: 1px solid #a7f3d0;">Pelanggan</span>`;
+                        } else {
+                            roleBadge = `<span class="status-badge status-pending" style="font-size: 10px; background-color: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb;">Pengunjung</span>`;
+                        }
+
+                        let activeText = '';
+                        if (user.last_active_diff < 15) {
+                            activeText = '<span style="color: var(--success); font-weight: 700;">🟢 Online sekarang</span>';
+                        } else if (user.last_active_diff < 60) {
+                            activeText = `${user.last_active_diff} detik yang lalu`;
+                        } else {
+                            const mins = Math.floor(user.last_active_diff / 60);
+                            activeText = `${mins} menit yang lalu`;
+                        }
+
+                        const durationText = user.last_active_diff < 15 ? `<span style="font-weight:600; color:var(--success);">Sedang Aktif</span>` : `<span style="color:var(--text-muted);">Tidak Aktif</span>`;
+
+                        rowsHtml += `
+                            <tr class="active-user-row animate-fade-in">
+                                <td>
+                                    <div class="cart-product" style="gap: 10px;">
+                                        ${avatarHtml}
+                                        <div>
+                                            <span style="font-weight: 600; font-size: 14px; color: var(--secondary);">${user.name}</span>
+                                            <small style="color: var(--text-muted); display: block; font-size: 11px;">${user.email}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    ${roleBadge}
+                                </td>
+                                <td style="font-family: monospace; font-size: 13px;">
+                                    ${user.ip_address}
+                                </td>
+                                <td style="font-size: 13px; color: var(--text-muted);">
+                                    💻 <strong>
+                                        ${user.platform}
+                                    </strong> (${user.browser})
+                                </td>
+                                <td style="font-size: 13px;">
+                                    ${activeText}
+                                </td>
+                                <td style="font-size: 13px; font-family: monospace;">
+                                    ${durationText}
+                                </td>
+                            </tr>
+                        `;
+                    });
+
+                    tbody.innerHTML = rowsHtml;
+                }
+            })
+            .catch(err => console.error("Error active users API:", err));
+    }
+
+    // Hook into switchTab
+    const originalSwitchTab = window.switchTab;
+    window.switchTab = function(evt, tabId) {
+        if (typeof originalSwitchTab === 'function') {
+            originalSwitchTab(evt, tabId);
+        }
+
+        if (tabId === 'tab-active-users') {
+            fetchActiveUsers();
+            if (!activeUsersInterval) {
+                activeUsersInterval = setInterval(fetchActiveUsers, 3000); // poll every 3s
+            }
+        } else {
+            if (activeUsersInterval) {
+                clearInterval(activeUsersInterval);
+                activeUsersInterval = null;
+            }
+        }
+    };
+
+    // Global badge count checking
+    setInterval(() => {
+        fetch("{{ route('admin.active-users') }}")
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    const badge = document.getElementById('active-users-count-badge');
+                    if (badge) {
+                        if (data.count > 0) {
+                            badge.textContent = data.count;
+                            badge.style.display = 'inline-block';
+                        } else {
+                            badge.style.display = 'none';
+                        }
+                    }
+                }
+            }).catch(e => {});
+    }, 10000);
 </script>
 @endsection

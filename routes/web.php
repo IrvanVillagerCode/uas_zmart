@@ -19,9 +19,11 @@ Route::prefix('cart')->group(function () {
     Route::post('/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 });
 
-// Checkout Routes (Requires authentication middleware check in controller)
+// Checkout & Midtrans Routes (Requires authentication middleware check in controller)
 Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
 Route::post('/checkout/store', [CheckoutController::class, 'store'])->name('checkout.store');
+Route::get('/orders/{id}/pay', [CheckoutController::class, 'payNow'])->name('orders.pay');
+Route::post('/midtrans/notification', [CheckoutController::class, 'notification'])->name('midtrans.notification');
 
 // Auth View Routes
 Route::get('/login', function () {
@@ -60,4 +62,5 @@ Route::prefix('admin')->group(function () {
     Route::post('/products/update/{id}', [AdminController::class, 'updateProduct'])->name('admin.products.update');
     Route::post('/products/delete/{id}', [AdminController::class, 'deleteProduct'])->name('admin.products.delete');
     Route::post('/orders/status/{id}', [AdminController::class, 'updateOrderStatus'])->name('admin.orders.status');
+    Route::get('/active-users', [AdminController::class, 'activeUsers'])->name('admin.active-users');
 });

@@ -19,6 +19,8 @@ class Order extends Model
         'total_amount',
         'status',
         'payment_method',
+        'snap_token',
+        'payment_url',
         'shipping_address',
         'notes',
         'shipping_proof_path',

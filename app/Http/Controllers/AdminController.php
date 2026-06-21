@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -153,5 +154,89 @@ class AdminController extends Controller
         $order->save();
 
         return \redirect()->back()->with('success', "Status pesanan #{$order->order_number} berhasil diperbarui menjadi " . ucfirst($request->status) . "!");
+    }
+
+    /**
+     * Get active users and their real-time session duration.
+     */
+    public function activeUsers(Request $request)
+    {
+        if (!Auth::check() || Auth::user()->role !== 'admin') {
+            return response()->json(['error' => 'Akses ditolak!'], 403);
+        }
+
+        // Get sessions active in the last 5 minutes (300 seconds)
+        $threshold = time() - 300;
+
+        $sessions = DB::table('sessions')
+            ->leftJoin('users', 'sessions.user_id', '=', 'users.id')
+            ->select(
+                'sessions.id as session_id',
+                'sessions.user_id',
+                'sessions.ip_address',
+                'sessions.user_agent',
+                'sessions.last_activity',
+                'users.username',
+                'users.full_name',
+                'users.email',
+                'users.avatar',
+                'users.role'
+            )
+            ->where('sessions.last_activity', '>=', $threshold)
+            ->orderBy('sessions.last_activity', 'desc')
+            ->get();
+
+        $data = $sessions->map(function ($session) {
+            $ua = $session->user_agent ?? 'Unknown';
+            $browser = 'Unknown Browser';
+            $platform = 'Unknown Platform';
+
+            if (preg_match('/MSIE/i', $ua) && !preg_match('/Opera/i', $ua)) {
+                $browser = 'Internet Explorer';
+            } elseif (preg_match('/Firefox/i', $ua)) {
+                $browser = 'Mozilla Firefox';
+            } elseif (preg_match('/Chrome/i', $ua)) {
+                $browser = 'Google Chrome';
+            } elseif (preg_match('/Safari/i', $ua)) {
+                $browser = 'Apple Safari';
+            } elseif (preg_match('/Opera/i', $ua)) {
+                $browser = 'Opera';
+            }
+
+            if (preg_match('/windows|win32/i', $ua)) {
+                $platform = 'Windows';
+            } elseif (preg_match('/macintosh|mac os x/i', $ua)) {
+                $platform = 'macOS';
+            } elseif (preg_match('/linux/i', $ua)) {
+                $platform = 'Linux';
+            } elseif (preg_match('/iphone|ipad/i', $ua)) {
+                $platform = 'iOS';
+            } elseif (preg_match('/android/i', $ua)) {
+                $platform = 'Android';
+            }
+
+            $lastActiveDiff = time() - $session->last_activity;
+
+            return [
+                'session_id' => substr($session->session_id, 0, 10) . '...',
+                'user_id' => $session->user_id,
+                'name' => $session->full_name ?? ($session->username ?? 'Guest/Pengunjung'),
+                'email' => $session->email ?? '-',
+                'avatar' => $session->avatar ?? null,
+                'role' => $session->role ?? 'guest',
+                'ip_address' => $session->ip_address ?? '127.0.0.1',
+                'browser' => $browser,
+                'platform' => $platform,
+                'last_activity' => $session->last_activity,
+                'last_active_diff' => $lastActiveDiff,
+                'is_admin' => $session->role === 'admin',
+            ];
+        });
+
+        return response()->json([
+            'success' => true,
+            'count' => $data->count(),
+            'active_users' => $data
+        ]);
     }
 }
