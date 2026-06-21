@@ -73,22 +73,6 @@ INSERT INTO `chat_rooms` (`id`, `customer_id`, `admin_id`, `status`, `created_at
 ('1', '3', NULL, 'open', '2026-06-14 16:21:20', '2026-06-14 16:21:20', NULL);
 
 -- --------------------------------------------------------
--- Table structure for `migrations`
--- --------------------------------------------------------
-
-DROP TABLE IF EXISTS `migrations`;
-CREATE TABLE `migrations` (
-  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `version` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `class` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `group` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `namespace` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
-  `time` int NOT NULL,
-  `batch` int unsigned NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- Dumping data for `migrations`
 
 -- --------------------------------------------------------
 -- Table structure for `order_items`

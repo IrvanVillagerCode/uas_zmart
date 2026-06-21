@@ -16,7 +16,7 @@ class AdminController extends Controller
     public function index()
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->route('login')->with('error', 'Akses ditolak! Halaman ini hanya untuk Admin.');
+            return \redirect()->route('login')->with('error', 'Akses ditolak! Halaman ini hanya untuk Admin.');
         }
 
         // Stats
@@ -29,7 +29,7 @@ class AdminController extends Controller
         $products = Product::orderBy('id', 'desc')->get();
         $orders = Order::with('user', 'items.product')->orderBy('id', 'desc')->get();
 
-        return view('admin.dashboard', compact('totalSales', 'totalOrders', 'totalProducts', 'totalCustomers', 'products', 'orders'));
+        return \view('admin.dashboard', compact('totalSales', 'totalOrders', 'totalProducts', 'totalCustomers', 'products', 'orders'));
     }
 
     /**
@@ -38,7 +38,7 @@ class AdminController extends Controller
     public function storeProduct(Request $request)
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->back()->with('error', 'Akses ditolak!');
+            return \redirect()->back()->with('error', 'Akses ditolak!');
         }
 
         $request->validate([
@@ -56,8 +56,8 @@ class AdminController extends Controller
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/products'), $filename);
-            $imagePath = asset('uploads/products/' . $filename);
+            $file->move(\public_path('uploads/products'), $filename);
+            $imagePath = \asset('uploads/products/' . $filename);
         } elseif ($request->image_url) {
             $imagePath = $request->image_url;
         }
@@ -73,16 +73,16 @@ class AdminController extends Controller
             'is_active' => 1
         ]);
 
-        return redirect()->back()->with('success', 'Produk baru berhasil ditambahkan!');
+        return \redirect()->back()->with('success', 'Produk baru berhasil ditambahkan!');
     }
 
     /**
      * Update an existing product.
      */
-    public function updateProduct(Request $request, $id)
+    public function updateProduct(Request $request, int $id)
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->back()->with('error', 'Akses ditolak!');
+            return \redirect()->back()->with('error', 'Akses ditolak!');
         }
 
         $product = Product::findOrFail($id);
@@ -102,8 +102,8 @@ class AdminController extends Controller
         if ($request->hasFile('image_file')) {
             $file = $request->file('image_file');
             $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
-            $file->move(public_path('uploads/products'), $filename);
-            $imagePath = asset('uploads/products/' . $filename);
+            $file->move(\public_path('uploads/products'), $filename);
+            $imagePath = \asset('uploads/products/' . $filename);
         } elseif ($request->image_url) {
             $imagePath = $request->image_url;
         }
@@ -117,31 +117,31 @@ class AdminController extends Controller
             'category' => strtolower($request->category),
         ]);
 
-        return redirect()->back()->with('success', 'Produk berhasil diperbarui!');
+        return \redirect()->back()->with('success', 'Produk berhasil diperbarui!');
     }
 
     /**
      * Delete a product.
      */
-    public function deleteProduct($id)
+    public function deleteProduct(int $id)
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->back()->with('error', 'Akses ditolak!');
+            return \redirect()->back()->with('error', 'Akses ditolak!');
         }
 
         $product = Product::findOrFail($id);
         $product->delete();
 
-        return redirect()->back()->with('success', 'Produk berhasil dihapus!');
+        return \redirect()->back()->with('success', 'Produk berhasil dihapus!');
     }
 
     /**
      * Update order status.
      */
-    public function updateOrderStatus(Request $request, $id)
+    public function updateOrderStatus(Request $request, int $id)
     {
         if (!Auth::check() || Auth::user()->role !== 'admin') {
-            return redirect()->back()->with('error', 'Akses ditolak!');
+            return \redirect()->back()->with('error', 'Akses ditolak!');
         }
 
         $request->validate([
@@ -152,6 +152,6 @@ class AdminController extends Controller
         $order->status = $request->status;
         $order->save();
 
-        return redirect()->back()->with('success', "Status pesanan #{$order->order_number} berhasil diperbarui menjadi " . ucfirst($request->status) . "!");
+        return \redirect()->back()->with('success', "Status pesanan #{$order->order_number} berhasil diperbarui menjadi " . ucfirst($request->status) . "!");
     }
 }
