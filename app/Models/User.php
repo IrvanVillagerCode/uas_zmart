@@ -65,6 +65,7 @@ class User extends Authenticatable
 
     /**
      * Override remember token methods to disable database updates since the column is not present.
+     * Must return null (not empty string) so Laravel skips the remember_token UPDATE query entirely.
      */
     public function getRememberToken()
     {
@@ -73,11 +74,11 @@ class User extends Authenticatable
 
     public function setRememberToken($value)
     {
-        // Do nothing
+        // Do nothing — no remember_token column in this table
     }
 
     public function getRememberTokenName()
     {
-        return '';
+        return null; // Returning null tells Laravel to skip remember_token DB update
     }
 }

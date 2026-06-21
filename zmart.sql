@@ -1,284 +1,234 @@
--- phpMyAdmin SQL Dump
--- version 5.2.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Waktu pembuatan: 02 Bulan Mei 2026 pada 14.56
--- Versi server: 10.4.32-MariaDB
--- Versi PHP: 8.2.12
-
+-- Z-MART Database Dump
+SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
-SET time_zone = "+00:00";
-
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8mb4 */;
-
---
--- Database: `zmart`
---
 
 -- --------------------------------------------------------
+-- Table structure for `cart`
+-- --------------------------------------------------------
 
---
--- Struktur dari tabel `cart`
---
-
+DROP TABLE IF EXISTS `cart`;
 CREATE TABLE `cart` (
-  `id` int(11) NOT NULL,
-  `user_name` varchar(100) DEFAULT NULL,
-  `product_id` int(11) DEFAULT NULL,
-  `qty` int(11) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `product_id` int NOT NULL,
+  `quantity` int NOT NULL DEFAULT '1',
+  `added_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `cart_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `cart_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Dumping data for `cart`
 
 -- --------------------------------------------------------
+-- Table structure for `chat_messages`
+-- --------------------------------------------------------
 
---
--- Struktur dari tabel `chat_messages`
---
-
+DROP TABLE IF EXISTS `chat_messages`;
 CREATE TABLE `chat_messages` (
-  `id` int(11) NOT NULL,
-  `sender` varchar(50) DEFAULT NULL,
-  `receiver` varchar(50) DEFAULT NULL,
-  `message` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `is_read` tinyint(1) DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `chat_room_id` int NOT NULL,
+  `sender_id` int NOT NULL,
+  `receiver_id` int DEFAULT NULL,
+  `message` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `is_read` tinyint(1) DEFAULT '0',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `chat_room_id` (`chat_room_id`),
+  KEY `sender_id` (`sender_id`),
+  KEY `receiver_id` (`receiver_id`),
+  CONSTRAINT `chat_messages_ibfk_1` FOREIGN KEY (`chat_room_id`) REFERENCES `chat_rooms` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chat_messages_ibfk_2` FOREIGN KEY (`sender_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chat_messages_ibfk_3` FOREIGN KEY (`receiver_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data untuk tabel `chat_messages`
---
-
-INSERT INTO `chat_messages` (`id`, `sender`, `receiver`, `message`, `created_at`, `is_read`) VALUES
-(1, 'user1', 'admin', 'ini ready ga ka?', '2026-04-30 10:26:02', 1),
-(2, 'admin', 'user1', 'yang mana ka?', '2026-04-30 11:01:26', 0),
-(3, 'user1', 'admin', 'yang mana', '2026-04-30 11:02:28', 1),
-(4, 'user1', 'admin', 'yang lakban', '2026-04-30 11:12:39', 1),
-(5, 'admin', 'user1', 'ready ka', '2026-04-30 11:13:06', 0),
-(6, 'user1', 'admin', 'oke ka', '2026-04-30 11:17:24', 1);
+-- Dumping data for `chat_messages`
 
 -- --------------------------------------------------------
+-- Table structure for `chat_rooms`
+-- --------------------------------------------------------
 
---
--- Struktur dari tabel `chat_rooms`
---
-
+DROP TABLE IF EXISTS `chat_rooms`;
 CREATE TABLE `chat_rooms` (
-  `id` int(11) NOT NULL,
-  `user_name` varchar(100) DEFAULT NULL,
-  `admin_name` varchar(100) DEFAULT 'admin',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `customer_id` int NOT NULL,
+  `admin_id` int DEFAULT NULL,
+  `status` enum('open','closed') COLLATE utf8mb4_unicode_ci DEFAULT 'open',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `closed_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `admin_id` (`admin_id`),
+  CONSTRAINT `chat_rooms_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `chat_rooms_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data untuk tabel `chat_rooms`
---
+-- Dumping data for `chat_rooms`
 
-INSERT INTO `chat_rooms` (`id`, `user_name`, `admin_name`, `created_at`) VALUES
-(1, 'user1', 'admin', '2026-04-30 09:50:15');
-
--- --------------------------------------------------------
-
---
--- Struktur dari tabel `orders`
---
-
-CREATE TABLE `orders` (
-  `id` int(11) NOT NULL,
-  `user_name` varchar(100) DEFAULT NULL,
-  `total` int(11) DEFAULT NULL,
-  `status` varchar(50) DEFAULT 'pending',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
---
--- Dumping data untuk tabel `orders`
---
-
-INSERT INTO `orders` (`id`, `user_name`, `total`, `status`, `created_at`) VALUES
-(43, 'user1', 10000, 'dibatalkan', '2026-04-30 15:34:04'),
-(44, 'user1', 17000, 'dibatalkan', '2026-04-30 15:36:03'),
-(45, 'user1', 3200, 'dibatalkan', '2026-04-30 15:38:48'),
-(46, 'user1', 3200, 'dibatalkan', '2026-04-30 15:43:13'),
-(47, 'user1', 10000, 'dibatalkan', '2026-04-30 15:46:17'),
-(48, 'user1', 20000, 'dibatalkan', '2026-04-30 15:46:40');
+INSERT INTO `chat_rooms` (`id`, `customer_id`, `admin_id`, `status`, `created_at`, `updated_at`, `closed_at`) VALUES
+('1', '3', NULL, 'open', '2026-06-14 16:21:20', '2026-06-14 16:21:20', NULL);
 
 -- --------------------------------------------------------
+-- Table structure for `migrations`
+-- --------------------------------------------------------
 
---
--- Struktur dari tabel `order_items`
---
+DROP TABLE IF EXISTS `migrations`;
+CREATE TABLE `migrations` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `version` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `class` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `group` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `namespace` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `time` int NOT NULL,
+  `batch` int unsigned NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- Dumping data for `migrations`
+
+-- --------------------------------------------------------
+-- Table structure for `order_items`
+-- --------------------------------------------------------
+
+DROP TABLE IF EXISTS `order_items`;
 CREATE TABLE `order_items` (
-  `id` int(11) NOT NULL,
-  `order_id` int(11) NOT NULL,
-  `product_id` int(11) NOT NULL,
-  `qty` int(11) NOT NULL,
-  `price` int(11) NOT NULL,
-  `subtotal` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `order_id` int NOT NULL,
+  `product_id` int NOT NULL,
+  `product_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `quantity` int NOT NULL,
+  `unit_price` decimal(10,2) NOT NULL,
+  `subtotal` decimal(10,2) NOT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `order_id` (`order_id`),
+  KEY `product_id` (`product_id`),
+  CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE RESTRICT
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data untuk tabel `order_items`
---
+-- Dumping data for `order_items`
 
-INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `qty`, `price`, `subtotal`, `created_at`) VALUES
-(21, 44, 15, 2, 3700, 7400, '2026-04-30 15:36:03'),
-(22, 44, 14, 3, 3200, 9600, '2026-04-30 15:36:03'),
-(23, 45, 14, 1, 3200, 3200, '2026-04-30 15:38:48'),
-(24, 46, 14, 1, 3200, 3200, '2026-04-30 15:43:13'),
-(25, 47, 16, 1, 10000, 10000, '2026-04-30 15:46:17'),
-(26, 48, 16, 2, 10000, 20000, '2026-04-30 15:46:40');
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `product_name`, `quantity`, `unit_price`, `subtotal`, `created_at`) VALUES
+('1', '1', '1', 'Kaos Polos Cotton Combed 30s', '1', '45000.00', '45000.00', '2026-06-20 06:37:14'),
+('2', '2', '6', 'Celana Cargo Corduroy Brown', '1', '175000.00', '175000.00', '2026-06-20 06:55:09'),
+('3', '3', '1', 'Kaos Polos Cotton Combed 30s', '3', '45000.00', '135000.00', '2026-06-20 07:14:48'),
+('4', '4', '3', 'Kemeja Flanel Slim Fit Red-Black', '10', '120000.00', '1200000.00', '2026-06-20 10:24:02'),
+('5', '5', '2', 'Jaket Denim Klasik Indigo', '3', '185000.00', '555000.00', '2026-06-20 20:32:15'),
+('6', '6', '23', 'Pelembab Wajah SPF 30 50ml', '1', '45000.00', '45000.00', '2026-06-21 08:08:40'),
+('7', '6', '14', 'Susu UHT Full Cream 1L', '23', '18500.00', '425500.00', '2026-06-21 08:08:40');
 
 -- --------------------------------------------------------
+-- Table structure for `orders`
+-- --------------------------------------------------------
 
---
--- Struktur dari tabel `products`
---
+DROP TABLE IF EXISTS `orders`;
+CREATE TABLE `orders` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `user_id` int NOT NULL,
+  `order_number` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `total_amount` decimal(10,2) NOT NULL,
+  `status` enum('pending','success','failed','cancelled') COLLATE utf8mb4_unicode_ci DEFAULT 'pending',
+  `payment_method` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shipping_address` text COLLATE utf8mb4_unicode_ci,
+  `notes` text COLLATE utf8mb4_unicode_ci,
+  `shipping_proof_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `order_number` (`order_number`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Dumping data for `orders`
+
+INSERT INTO `orders` (`id`, `user_id`, `order_number`, `total_amount`, `status`, `payment_method`, `shipping_address`, `notes`, `shipping_proof_path`, `created_at`, `updated_at`) VALUES
+('1', '2', 'ORD-178191223417', '45000.00', 'pending', 'Transfer Bank', 'Jl. Melati No. 12, Kebayoran Baru, Jakarta Selatan, 12130', NULL, NULL, '2026-06-19 23:37:14', '2026-06-19 23:37:14'),
+('2', '1', 'ORD-178191330917', '175000.00', 'pending', 'Transfer Bank', 'jalan malaka 3 HB no 12 J', NULL, NULL, '2026-06-19 23:55:09', '2026-06-19 23:55:09'),
+('3', '3', 'ORD-178191448872', '135000.00', 'pending', 'Transfer Bank', 'Jl. Raya Testing No. 123, Jakarta Selatan', NULL, NULL, '2026-06-20 00:14:48', '2026-06-20 00:14:48'),
+('4', '6', 'ORD-178192584274', '1200000.00', 'success', 'Transfer Bank', 'jalan bekasi rt 12 rw 6', NULL, NULL, '2026-06-20 03:24:02', '2026-06-20 03:27:55'),
+('5', '5', 'ORD-178196233540', '555000.00', 'pending', 'Transfer Bank', 'jln babelan rt01', NULL, NULL, '2026-06-20 13:32:15', '2026-06-20 13:32:15'),
+('6', '3', 'ORD-178200412058', '470500.00', 'pending', 'Transfer Bank', 'jlaman malaka 3 hb no 12 j', NULL, NULL, '2026-06-21 01:08:40', '2026-06-21 01:08:40');
+
+-- --------------------------------------------------------
+-- Table structure for `products`
+-- --------------------------------------------------------
+
+DROP TABLE IF EXISTS `products`;
 CREATE TABLE `products` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) DEFAULT NULL,
-  `price` int(11) DEFAULT NULL,
-  `image` varchar(255) DEFAULT NULL,
-  `link` text DEFAULT NULL,
-  `stock` int(11) DEFAULT 0,
-  `category` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci,
+  `price` decimal(10,2) NOT NULL,
+  `stock` int NOT NULL DEFAULT '0',
+  `image` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `external_link` varchar(500) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `category` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data untuk tabel `products`
---
+-- Dumping data for `products`
 
-INSERT INTO `products` (`id`, `name`, `price`, `image`, `link`, `stock`, `category`) VALUES
-(9, 'Indomie Kari Ayam', 3800, '1777363904.png', '', 4, 'makanan'),
-(10, 'Lakban Daimaru 1 inch', 7200, '1777530643.png', '', 51, 'atk'),
-(11, 'Buku Tulis Sidu', 38000, '1777530827.png', '', 11, 'atk'),
-(12, 'Indomie Goreng', 3700, '1777553617.png', '', 6, 'makanan'),
-(13, 'Penggaris Butterfly 30cm', 3000, '1777553770.png', '', 90, 'atk'),
-(14, 'Tisue Passeo', 3200, '1777554061.png', '', 500, 'rumah'),
-(15, 'Indomie Ayam Bawang', 3700, '1777554291.png', '', 30, 'makanan'),
-(16, 'Mama Lemon', 10000, '1777554678.png', '', 25, 'rumah');
+INSERT INTO `products` (`id`, `name`, `description`, `price`, `stock`, `image`, `external_link`, `category`, `is_active`, `created_at`, `updated_at`) VALUES
+('1', 'Kaos Polos Cotton Combed 30s', 'Bahan katun premium Combed 30s yang sangat lembut, adem, dan menyerap keringat. Cocok untuk bersantai sehari-hari.', '45000.00', '120', 'https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=600&auto=format&fit=crop&q=80', '', 'kaos', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('2', 'Jaket Denim Klasik Indigo', 'Jaket denim berkualitas tinggi dengan jahitan kuat dan detail washed retro yang modis.', '185000.00', '45', 'https://images.unsplash.com/photo-1576995853123-5a10305d93c0?w=600&auto=format&fit=crop&q=80', '', 'jaket', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('3', 'Kemeja Flanel Slim Fit Red-Black', 'Kemeja flanel lengan panjang dengan motif kotak-kotak klasik. Sangat cocok dipadukan dengan kaos polos.', '120000.00', '60', 'https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=600&auto=format&fit=crop&q=80', '', 'kemeja', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('4', 'Celana Chino Stretch Slim Beige', 'Celana chino kasual stretch yang elastis dan nyaman untuk bergerak bebas sepanjang hari.', '150000.00', '75', 'https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=600&auto=format&fit=crop&q=80', '', 'celana', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('5', 'Hoodie Pullover Oversized Sage Green', 'Hoodie rajutan premium yang tebal dan hangat namun tetap sejuk dipakai di siang hari.', '195000.00', '35', 'https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=600&auto=format&fit=crop&q=80', '', 'hoodie', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('6', 'Celana Cargo Corduroy Brown', 'Celana cargo berbahan corduroy premium dengan saku samping fungsional untuk petualangan urban Anda.', '175000.00', '28', 'https://images.unsplash.com/photo-1517462964-21fdcec3f25b?w=600&auto=format&fit=crop&q=80', '', 'celana', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('7', 'Jaket Bomber Vintage Black', 'Jaket bomber dengan lapisan windbreaker tebal yang melindungi dari dingin malam namun tetap stylish.', '210000.00', '20', 'https://images.unsplash.com/photo-1551028719-00167b16eac5?w=600&auto=format&fit=crop&q=80', '', 'jaket', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('8', 'Kaos Polo Premium Navy Blue', 'Kaos polo semi-formal berkancing dengan kerah rajut padat dan rajutan katun berpori yang breathable.', '85000.00', '80', 'https://images.unsplash.com/photo-1581655353564-df123a1eb820?w=600&auto=format&fit=crop&q=80', '', 'kaos', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('9', 'Beras Premium Pandan Wangi 5kg', 'Beras putih pulen premium varietas Pandan Wangi pilihan petani terbaik. Aroma wangi alami dan tekstur nasi yang lembut.', '68000.00', '150', 'https://images.unsplash.com/photo-1586201375761-83865001e31c?w=600&auto=format&fit=crop&q=80', '', 'sembako', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('10', 'Minyak Goreng Kemasan 1L', 'Minyak goreng sawit berkualitas tinggi, jernih, bebas kolesterol jahat. Cocok untuk menggoreng, menumis, dan memanggang.', '22000.00', '200', 'https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?w=600&auto=format&fit=crop&q=80', '', 'sembako', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('11', 'Gula Pasir Rafinasi 1kg', 'Gula pasir putih halus berkualitas tinggi, bersih tanpa kotoran. Ideal untuk memasak, kue, dan minuman.', '16500.00', '180', 'https://images.unsplash.com/photo-1571506165871-ee72a35bc9d4?w=600&auto=format&fit=crop&q=80', '', 'sembako', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('12', 'Telur Ayam Negeri Segar 1 Kg', 'Telur ayam negeri segar langsung dari peternak, protein tinggi untuk kebutuhan gizi keluarga sehari-hari.', '28000.00', '100', 'https://images.unsplash.com/photo-1506976785307-8732e854ad03?w=600&auto=format&fit=crop&q=80', '', 'sembako', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('13', 'Mie Instan Rasa Ayam Bawang (Box)', 'Isi 40 bungkus per karton. Mie instan favorit keluarga dengan bumbu khas ayam bawang yang gurih.', '95000.00', '80', 'https://images.unsplash.com/photo-1569718212165-3a8278d5f624?w=600&auto=format&fit=crop&q=80', '', 'makanan', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('14', 'Susu UHT Full Cream 1L', 'Susu sapi segar Ultra High Temperature dengan lemak penuh. Sumber kalsium dan protein untuk pertumbuhan.', '18500.00', '97', 'https://images.unsplash.com/photo-1550583724-b2692b85b150?w=600&auto=format&fit=crop&q=80', '', 'minuman', '1', '2026-06-21 00:51:45', '2026-06-21 01:08:40'),
+('15', 'Air Mineral Botol 600ml (1 Krat)', 'Air mineral segar tersaring 100% alami dalam kemasan botol praktis. Segar, bersih, bebas kuman.', '24000.00', '60', 'https://images.unsplash.com/photo-1548839140-29a749e1cf4d?w=600&auto=format&fit=crop&q=80', '', 'minuman', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('16', 'Sabun Cuci Piring Busa Aktif 800ml', 'Formula busa tebal dengan aroma jeruk segar. Efektif membersihkan lemak membandel tanpa merusak kulit tangan.', '15000.00', '200', 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?w=600&auto=format&fit=crop&q=80', '', 'kebersihan', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('17', 'Deterjen Cair Konsentrat 800ml', 'Deterjen cair konsentrat yang efisien. Formula Enzyme Power mengangkat noda membandel pada baju kesayangan Anda.', '32000.00', '150', 'https://images.unsplash.com/photo-1585670083947-7c3a5e2ebe02?w=600&auto=format&fit=crop&q=80', '', 'kebersihan', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('18', 'Pembersih Lantai Anti-Kuman 1.8L', 'Formula anti-kuman 99.9% dengan wangi lavender tahan lama. Menjaga lantai bersih, wangi, dan bebas bakteri.', '28500.00', '90', 'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=600&auto=format&fit=crop&q=80', '', 'kebersihan', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('19', 'Tisu Wajah Lembut 200 Lembar', 'Tisu wajah lembut ekstra soft berbahan pulp premium. Tidak berbulu, aman untuk kulit wajah sensitif.', '18000.00', '300', 'https://images.unsplash.com/photo-1616628188859-7a11abb6fcc9?w=600&auto=format&fit=crop&q=80', '', 'kebersihan', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('20', 'Shampo Perawatan Rambut 340ml', 'Formula keratin dan argan oil yang menutrisi rambut dari akar hingga ujung. Membuat rambut halus, berkilau, dan bebas kusut.', '34000.00', '110', 'https://images.unsplash.com/photo-1585751119414-ef2636f8aede?w=600&auto=format&fit=crop&q=80', '', 'perawatan', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('21', 'Sabun Mandi Cair Moisturizing 400ml', 'Sabun mandi cair dengan pelembab shea butter dan vitamin E. Menjaga kelembaban kulit hingga 24 jam setelah mandi.', '28000.00', '250', 'https://images.unsplash.com/photo-1631729371254-42c2892f0e6e?w=600&auto=format&fit=crop&q=80', '', 'perawatan', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('22', 'Pasta Gigi Whitening Charcoal 120g', 'Formula charcoal aktif yang memutihkan gigi secara alami sekaligus melawan bakteri penyebab bau mulut.', '18000.00', '175', 'https://images.unsplash.com/photo-1559591937-abc0d0c77c58?w=600&auto=format&fit=crop&q=80', '', 'perawatan', '1', '2026-06-21 00:51:45', '2026-06-21 00:51:45'),
+('23', 'Pelembab Wajah SPF 30 50ml', 'Pelembab wajah ringan dengan perlindungan UV SPF 30. Cocok untuk pemakaian sehari-hari di luar dan dalam ruangan.', '45000.00', '84', 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=600&auto=format&fit=crop&q=80', '', 'perawatan', '1', '2026-06-21 00:51:45', '2026-06-21 01:08:40');
 
 -- --------------------------------------------------------
+-- Table structure for `users`
+-- --------------------------------------------------------
 
---
--- Struktur dari tabel `users`
---
-
+DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` enum('admin','user') DEFAULT 'user'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `full_name` varchar(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `role` enum('customer','admin') COLLATE utf8mb4_unicode_ci DEFAULT 'customer',
+  `avatar` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `google_uid` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `username` (`username`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
---
--- Dumping data untuk tabel `users`
---
+-- Dumping data for `users`
 
-INSERT INTO `users` (`id`, `username`, `password`, `role`) VALUES
-(1, 'admin', '12345', 'admin'),
-(2, 'user1', '12345', 'user');
+INSERT INTO `users` (`id`, `username`, `email`, `password`, `full_name`, `role`, `avatar`, `google_uid`, `created_at`, `updated_at`) VALUES
+('1', 'admin', 'admin@zmart.id', 'admin123', 'System Admin', 'admin', NULL, NULL, '2026-06-21 07:51:45', '2026-06-21 07:51:45'),
+('2', 'user1', 'user1@zmart.id', 'user123', 'Regular Customer', 'customer', NULL, NULL, '2026-06-21 07:51:45', '2026-06-21 07:51:45'),
+('3', 'irvanagussaputra710', 'irvanagussaputra710@gmail.com', 'google_oauth', 'Irvan Agus Saputra', 'customer', 'https://lh3.googleusercontent.com/a/ACg8ocJcyXKQAhaDWUMprM9MY3PBGVt25_8noDkfWyvWegoPWmB19A=s96-c', 'cYGQ22WAJrau3dw4VT8I1u1ECXo1', '2026-06-21 08:08:08', '2026-06-21 08:08:08');
 
---
--- Indexes for dumped tables
---
-
---
--- Indeks untuk tabel `cart`
---
-ALTER TABLE `cart`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indeks untuk tabel `chat_messages`
---
-ALTER TABLE `chat_messages`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indeks untuk tabel `chat_rooms`
---
-ALTER TABLE `chat_rooms`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indeks untuk tabel `orders`
---
-ALTER TABLE `orders`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indeks untuk tabel `order_items`
---
-ALTER TABLE `order_items`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indeks untuk tabel `products`
---
-ALTER TABLE `products`
-  ADD PRIMARY KEY (`id`);
-
---
--- Indeks untuk tabel `users`
---
-ALTER TABLE `users`
-  ADD PRIMARY KEY (`id`);
-
---
--- AUTO_INCREMENT untuk tabel yang dibuang
---
-
---
--- AUTO_INCREMENT untuk tabel `cart`
---
-ALTER TABLE `cart`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=61;
-
---
--- AUTO_INCREMENT untuk tabel `chat_messages`
---
-ALTER TABLE `chat_messages`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
-
---
--- AUTO_INCREMENT untuk tabel `chat_rooms`
---
-ALTER TABLE `chat_rooms`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT untuk tabel `orders`
---
-ALTER TABLE `orders`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
-
---
--- AUTO_INCREMENT untuk tabel `order_items`
---
-ALTER TABLE `order_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
-
---
--- AUTO_INCREMENT untuk tabel `products`
---
-ALTER TABLE `products`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
-
---
--- AUTO_INCREMENT untuk tabel `users`
---
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
-
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

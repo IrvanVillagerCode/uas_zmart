@@ -328,13 +328,15 @@ a {
 
 /* Shop Section & Categories */
 .shop-section {
-    padding-bottom: 80px;
+    padding: 64px 0 80px;
 }
 
 .section-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 20px;
     margin-bottom: 36px;
 }
 
@@ -346,7 +348,8 @@ a {
 .section-title p {
     color: var(--text-muted);
     font-size: 15px;
-    margin-top: 4px;
+    margin-top: 6px;
+    max-width: 500px;
 }
 
 .category-list {

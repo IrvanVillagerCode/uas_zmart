@@ -9,15 +9,31 @@ class HomeController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Product::where('is_active', 1);
+        $fashionCategories = ['kaos', 'jaket', 'kemeja', 'celana', 'hoodie'];
+        $dailyCategories   = ['sembako', 'makanan', 'minuman', 'kebersihan', 'perawatan'];
 
-        if ($request->has('category') && $request->category != '') {
-            $query->where('category', $request->category);
-        }
+        // Kirim semua produk aktif — filtering dilakukan oleh JavaScript di frontend
+        $fashionProducts   = Product::where('is_active', 1)
+            ->whereIn('category', $fashionCategories)
+            ->orderBy('category')
+            ->get();
 
-        $products = $query->get();
-        $categories = Product::where('is_active', 1)->select('category')->distinct()->pluck('category');
+        $dailyProducts     = Product::where('is_active', 1)
+            ->whereIn('category', $dailyCategories)
+            ->orderBy('category')
+            ->get();
 
-        return view('landing', compact('products', 'categories'));
+        $fashionCategoryList = $fashionProducts->pluck('category')->unique()->values();
+        $dailyCategoryList   = $dailyProducts->pluck('category')->unique()->values();
+
+        // Backward compat
+        $products   = $fashionProducts;
+        $categories = $fashionCategoryList;
+
+        return view('landing', compact(
+            'fashionProducts', 'fashionCategoryList',
+            'dailyProducts',   'dailyCategoryList',
+            'products',        'categories'
+        ));
     }
 }

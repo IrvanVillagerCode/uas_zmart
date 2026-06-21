@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # PHP Application Server
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: zmart-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    entrypoint: ["/var/www/html/docker/entrypoint.sh", "php-fpm"]
+    volumes:
+      - .:/var/www/html
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=zmart
+      - DB_USERNAME=root
+      - DB_PASSWORD=
+    depends_on:
+      - db
+
+  # Nginx Web Server
+  web:
+    image: nginx:alpine
+    container_name: zmart-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - .:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
+
+  # MySQL Database Server
+  db:
+    image: mysql:8.0
+    container_name: zmart-db
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - "33066:3306"
+    environment:
+      MYSQL_DATABASE: zmart
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - db-data:/var/lib/mysql
+
+volumes:
+  db-data:
